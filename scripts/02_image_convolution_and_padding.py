@@ -1,12 +1,3 @@
-"""Apply hand-written convolution to a frame - week 2, day 2.
-
-Runs the naive and the vectorised implementation on a grayscale crop, compares
-both padding strategies against OpenCV, and saves a side-by-side panel.
-
-    python scripts/02_image_convolution_and_padding.py
-    python scripts/02_image_convolution_and_padding.py --size 240 320 --show
-"""
-
 import argparse
 import os
 
@@ -16,13 +7,10 @@ import numpy as np
 from atlas.common.convolution import convolve_2d, convolve_2d_fast
 from configs.config import OUTPUT
 
-# Box blur: every weight equal, divided by the count so the sum is 1 and the
-# overall brightness of the image is preserved.
 BOX_BLUR = np.ones((3, 3), dtype=np.float32) / 9.0
 
 
 def load_grayscale(path: str, size: tuple) -> np.ndarray:
-    """Read the frame, drop the colour channels, keep a small corner of it."""
     img = cv2.imread(path)
     if img is None:
         raise RuntimeError(f"Image could not be read: {path}")
@@ -38,7 +26,6 @@ def load_grayscale(path: str, size: tuple) -> np.ndarray:
 
 
 def label(image: np.ndarray, text: str) -> np.ndarray:
-    """Write a caption on a copy of the image, leaving the original untouched."""
     tagged = image.copy()
     cv2.putText(tagged, text, (8, 20), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, (255,), 1, cv2.LINE_AA)
@@ -63,7 +50,6 @@ def main() -> None:
 
     crop = load_grayscale(args.image, tuple(args.size))
 
-    # Every call returns a new image - keep what comes back.
     naive_zero = convolve_2d(crop, BOX_BLUR, padding="zero")
     naive_replicate = convolve_2d(crop, BOX_BLUR, padding="replicate")
     fast_zero = convolve_2d_fast(crop, BOX_BLUR, padding="zero")

@@ -1,16 +1,3 @@
-"""Image anatomy analysis for ATLAS - week 2, day 1.
-
-Extracts a single frame from a video source and reports what that frame
-actually is: shape, dtype, memory footprint, per-channel statistics,
-resize quality under different interpolation methods, and the effect of
-normalisation.
-
-Run from the project root:
-
-    python scripts/01_image_anatomy.py
-    python scripts/01_image_anatomy.py --source path/to/video.mp4 --show
-"""
-
 import argparse
 import csv
 import json
@@ -31,7 +18,6 @@ INTERPOLATIONS = {
 
 
 def extract_frame(source: str, out_dir: str) -> str:
-    """Grab the first frame of `source` and save it as PNG. Returns its path."""
     cap = cv2.VideoCapture(source)
     if not cap.isOpened():
         raise RuntimeError(f"Video source could not be opened: {source}")
@@ -51,7 +37,6 @@ def extract_frame(source: str, out_dir: str) -> str:
 
 
 def load_image(path: str) -> np.ndarray:
-    """Read an image and fail loudly if it is missing or unreadable."""
     img = cv2.imread(path)
     if img is None:
         raise RuntimeError(f"Image could not be read: {path}")
@@ -59,10 +44,8 @@ def load_image(path: str) -> np.ndarray:
 
 
 def report_anatomy(img: np.ndarray) -> dict:
-    """Print and return the basic structure of the image."""
     height, width, channels = img.shape
 
-    # axis=(0, 1) collapses rows and columns, leaving one value per channel.
     per_channel = {
         "min": img.min(axis=(0, 1)).tolist(),
         "max": img.max(axis=(0, 1)).tolist(),
@@ -93,13 +76,10 @@ def report_anatomy(img: np.ndarray) -> dict:
 
 
 def mean_absolute_error(a: np.ndarray, b: np.ndarray) -> float:
-    """Average absolute difference between two images."""
-    # int16 avoids uint8 wrap-around when subtracting.
     return float(np.abs(a.astype(np.int16) - b.astype(np.int16)).mean())
 
 
 def peak_signal_noise_ratio(a: np.ndarray, b: np.ndarray) -> float:
-    """PSNR in dB, computed by hand rather than with cv2.PSNR."""
     mse = float(((a.astype(np.float64) - b.astype(np.float64)) ** 2).mean())
     if mse == 0:
         return float("inf")
@@ -107,9 +87,8 @@ def peak_signal_noise_ratio(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def resize_benchmark(img: np.ndarray, out_dir: str) -> list:
-    """Halve then restore the image with each interpolation and measure the loss."""
     height, width = img.shape[:2]
-    half = (width // 2, height // 2)       # cv2 wants (width, height)
+    half = (width // 2, height // 2)
     full = (width, height)
 
     rows = []
@@ -144,7 +123,6 @@ def resize_benchmark(img: np.ndarray, out_dir: str) -> list:
 
 
 def normalize_report(img: np.ndarray) -> dict:
-    """Min-max normalise to [0, 1] and show what it costs."""
     as_float64 = (img - img.min()) / (img.max() - img.min())
     as_float32 = as_float64.astype(np.float32)
 
