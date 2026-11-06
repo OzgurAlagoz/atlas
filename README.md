@@ -60,6 +60,9 @@ PYTHONPATH=src:. python -m atlas.main
 | `--source` | value from `configs/config.py` | Path to a video file, or a camera index |
 | `--res W H` | `780 540` | Width and height the frames are resized to |
 | `--save` | off | Record the annotated output to `outputs/<timestamp>.mp4` |
+| `--no-display` | off | Run without opening a window (for benchmarking) |
+| `--run-dir` | `outputs/runs/<timestamp>` | Where `frames.csv` and `run.json` are written |
+| `--warmup` | `5` | Frames left out of the run summary |
 
 Example:
 
@@ -67,7 +70,35 @@ Example:
 python -m atlas.main --source datasets/videos/room.mp4 --res 640 480 --save
 ```
 
-Press `q` in the video window to stop.
+### Keys
+
+| Key | Action |
+|---|---|
+| `q` | Stop |
+| `s` | Save the current annotated frame to `outputs/snapshots/` |
+
+### On-screen information
+
+Frame number, source FPS, processing FPS (exponential moving average), latency of the
+previous frame and output resolution.
+
+### Run logs
+
+Every run writes two files:
+
+- `frames.csv` - one row per frame: latency, interval, FPS and the time spent in each
+  stage (`read`, `render`, `write`, `display`)
+- `run.json` - date, commit hash, library versions, platform, run settings and a summary
+  (mean, median and p95 latency, mean FPS, mean time per stage)
+
+### Pipeline benchmark
+
+```bash
+python scripts/05_pipeline_benchmark.py
+```
+
+Runs the pipeline with and without a window and at three resolutions, three times each,
+and writes `outputs/day3/benchmark.csv`. Add `--skip-display` on machines without a GUI.
 
 ## Tests
 
